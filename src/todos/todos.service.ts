@@ -2,46 +2,55 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTodoDto } from './create-todo.dto';
 import { UpdateTodoDto } from './update-todo.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Todo, TodoDocument } from './todo.schema';
 
 @Injectable()
 export class TodosService {
+    constructor(@InjectModel(Todo.name) private todoModel: Model<TodoDocument>) { }
 
-    constructor(
-        @InjectModel(Todo.name) private todoModel: Model<TodoDocument>,
-    ) { }
-
-
-    async findAll() {
-        return await this.todoModel.find().exec()
+    async findAll(userId: string) {
+        return await this.todoModel.find({ userId, isDeleted: false }).exec();
     }
 
-    async create(todo: CreateTodoDto) {
-        const newTodo = new this.todoModel(todo)
+    async create(userId: string, todo: CreateTodoDto) {
+        const newTodo = new this.todoModel({ ...todo, userId: new Types.ObjectId(userId), });
         return await newTodo.save();
     }
 
-    async delete(id: string) {
-        const result = await this.todoModel.findByIdAndDelete(id);
+    async delete(id: string, userId: string) {
+        const result = await this.todoModel.findByIdAndDelete({ _id: id, userId });
         if (!result) {
-            throw new NotFoundException(`Todo with ID ${id} not found`)
+            throw new NotFoundException(`Todo with ID ${id} not found`);
         }
 
-        return { message: "Todo deleted", deleted: result }
+        return { message: 'Todo deleted', deleted: result };
     }
 
-    async update(id: string, updateData: UpdateTodoDto) {
+    async softDelete(id: string, userId: string) {
+        const todo = await this.todoModel.findOneAndUpdate(
+            { _id: id, userId, isDeleted: false },
+            { isDeleted: true },
+            { new: true },
+        );
 
-        const updated = await this.todoModel.findByIdAndUpdate(id, updateData, {
-            new: true
-        })
+        if (!todo) {
+            throw new NotFoundException('Todo not found or already deleted');
+        }
+        return { message: 'Todo soft deleted', todo };
+    }
+
+    async update(id: string, updateData: UpdateTodoDto, userId: string) {
+        const updated = await this.todoModel.findByIdAndUpdate(
+            { _id: id, userId },
+            updateData,
+            { new: true },
+        );
 
         if (!updated) {
-            throw new NotFoundException(`Todo with ID ${id} not found`)
+            throw new NotFoundException(`Todo with ID ${id} not found`);
         }
 
-        return { message: "Todo updated", updated: updated }
-
+        return { message: 'Todo updated', updated: updated };
     }
 }

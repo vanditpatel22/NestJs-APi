@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export type TodoDocument = Todo & Document;
 
@@ -12,6 +12,12 @@ export type TodoDocument = Todo & Document;
 export class Todo {
     @Prop({ required: true })
     title: string;
+
+    @Prop({ type: Types.ObjectId, required: true, ref: 'users' })
+    userId: Types.ObjectId;
+
+    @Prop({ default: false })
+    isDeleted: boolean;
 
     @Prop()
     created_at?: Date;
