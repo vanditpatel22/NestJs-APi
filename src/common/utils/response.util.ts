@@ -12,11 +12,12 @@ export interface ResponseMessage {
 export class ResponseUtil {
     constructor(private readonly i18n: I18nService) { }
 
-    getMessage(keyword: string, lang: string, components?: Record<string, any>): string {
+    getMessage(lang: string, keyword: string, components?: Record<string, any>): string {
         try {
-            return this.i18n.t(keyword, lang, components);
-        } catch (err) {
-            logger.error(err);
+            return this.i18n.t(lang, keyword, components);
+        } catch (error) {
+            logger.error(`getMessage :: ${error.message}`);
+            console.error(`getMessage :: ${error.message}`);
             return keyword;
         }
     }
@@ -28,14 +29,13 @@ export class ResponseUtil {
         responseCode: number | string,
         responseMessage: ResponseMessage,
         responseData: any = null,
-        extra?: Record<string, any>
     ): void {
         try {
             const lang = this.i18n.detectLanguage(req);
 
             const formedMsg = this.getMessage(
-                responseMessage.keyword,
                 lang,
+                responseMessage.keyword,
                 responseMessage.components
             );
 
@@ -45,11 +45,11 @@ export class ResponseUtil {
             };
 
             if (responseData !== null) resultObj.data = responseData;
-            if (extra && typeof extra === 'object') Object.assign(resultObj, extra);
 
             res.status(statusCode).json(resultObj);
         } catch (error) {
-            logger.error(error);
+            logger.error(error.message);
+            console.error(error);
             res.status(statusCode).json({
                 code: responseCode,
                 message: 'An internal error occurred',

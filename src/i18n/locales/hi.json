@@ -1,0 +1,20 @@
+{
+    "text_ip_address_not_found": "IP पता नहीं मिला या ब्लॉक किया गया है",
+    "text_user_register_succ": "उपयोगकर्ता सफलतापूर्वक पंजीकृत हो गया",
+    "text_user_register_fail": "उपयोगकर्ता पंजीकरण करते समय कुछ गलत हो गया",
+    "text_internal_error": "{{error}}",
+    "text_user_already_exists": "उपयोगकर्ता पहले से मौजूद है।",
+    "text_invalid_email": "कृपया वैध ईमेल पता दर्ज करें",
+    "text_invalid_password": "अमान्य पासवर्ड",
+    "text_user_login_succ": "उपयोगकर्ता सफलतापूर्वक लॉग इन हुआ",
+    "text_user_login_fail": "उपयोगकर्ता लॉग इन करने में विफल रहा",
+    "text_invalid_api_key": "अमान्य या गुम API कुंजी",
+    "text_todo_create_succ": "टू-डू सफलतापूर्वक बनाया गया",
+    "text_todo_create_fail": "टू-डू बनाने में विफल रहा",
+    "text_todo_list_succ": "टू-डू सूची सफलतापूर्वक प्राप्त हुई",
+    "text_todo_list_fail": "टू-डू सूची प्राप्त करने में विफलता",
+    "text_todo_update_succ": "टू-डू सफलतापूर्वक अपडेट हुआ",
+    "text_todo_update_fail": "टू-डू अपडेट करने में विफलता",
+    "text_todo_delete_succ": "टू-डू सफलतापूर्वक हटा दिया गया",
+    "text_todo_delete_fail": "टू-डू हटाने में विफल रहा"
+}

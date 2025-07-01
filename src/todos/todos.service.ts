@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateTodoDto } from './create-todo.dto';
-import { UpdateTodoDto } from './update-todo.dto';
+import { CreateTodoDto } from './dto/create-todo.dto';
+import { UpdateTodoDto } from './dto/update-todo.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Todo, TodoDocument } from './todo.schema';
@@ -10,7 +10,7 @@ export class TodosService {
     constructor(@InjectModel(Todo.name) private todoModel: Model<TodoDocument>) { }
 
     async findAll(userId: string) {
-        return await this.todoModel.find({ userId, isDeleted: false }).exec();
+        return await this.todoModel.find({ userId: new Types.ObjectId(userId), isDeleted: false }).exec();
     }
 
     async create(userId: string, todo: CreateTodoDto) {
@@ -21,23 +21,25 @@ export class TodosService {
     async delete(id: string, userId: string) {
         const result = await this.todoModel.findByIdAndDelete({ _id: id, userId });
         if (!result) {
-            throw new NotFoundException(`Todo with ID ${id} not found`);
+            throw new NotFoundException(`text_todo_not_found`);
         }
 
-        return { message: 'Todo deleted', deleted: result };
+        return result;
     }
 
     async softDelete(id: string, userId: string) {
         const todo = await this.todoModel.findOneAndUpdate(
-            { _id: id, userId, isDeleted: false },
+            { _id: new Types.ObjectId(id), userId: new Types.ObjectId(userId), isDeleted: false },
             { isDeleted: true },
             { new: true },
         );
+        console.log(todo, `softDelete`);
+
 
         if (!todo) {
-            throw new NotFoundException('Todo not found or already deleted');
+            throw new NotFoundException('text_todo_not_found');
         }
-        return { message: 'Todo soft deleted', todo };
+        return todo;
     }
 
     async update(id: string, updateData: UpdateTodoDto, userId: string) {
@@ -48,9 +50,9 @@ export class TodosService {
         );
 
         if (!updated) {
-            throw new NotFoundException(`Todo with ID ${id} not found`);
+            throw new NotFoundException(`text_todo_not_found`);
         }
 
-        return { message: 'Todo updated', updated: updated };
+        return updated;
     }
 }

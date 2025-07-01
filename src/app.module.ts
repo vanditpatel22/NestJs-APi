@@ -7,6 +7,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { ResponseUtil } from './common/utils/response.util';
+import { CommonModule } from './common/common.module';
+import { ApiKeyMiddleware } from './common/middleware/api-key.middleware';
+
 
 @Module({
   imports: [TodosModule,
@@ -17,22 +21,23 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
         const uri = configService.get<string>('MONGO_URI');
-        console.log('MONGO_URI:', uri);
         return { uri };
       },
       inject: [ConfigService],
     }),
     AuthModule,
-    UsersModule
-
+    UsersModule,
+    CommonModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ResponseUtil],
+  exports: [ResponseUtil]
 })
+
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(LoggerMiddleware)
+      .apply(LoggerMiddleware,ApiKeyMiddleware)
       .forRoutes('*'); // Apply to all routes, or list specific routes here
   }
 }
