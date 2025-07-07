@@ -10,7 +10,9 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { ResponseUtil } from './common/utils/response.util';
 import { CommonModule } from './common/common.module';
 import { ApiKeyMiddleware } from './common/middleware/api-key.middleware';
-
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { DecryptMiddleware } from './common/middleware/decrypt.middleware';
+import { EncryptInterceptor } from './common/interceptors/encrypt.interceptor';
 
 @Module({
   imports: [TodosModule,

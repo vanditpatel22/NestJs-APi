@@ -4,12 +4,25 @@ import { StreamOptions } from 'morgan';
 import { TransformableInfo } from 'logform';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as DailyRotateFile from 'winston-daily-rotate-file';
 
-// Ensure logs directory exists
-const logDir = path.join(__dirname, '../../logs');
-if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir, { recursive: true });
+
+// Helper: Create nested log directories based on current date (year/month/day)
+function getLogDir(): string {
+    const now = new Date();
+    const year = now.getFullYear().toString();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+
+    const logDir = path.join(__dirname, '../../logs', year, month, day);
+    if (!fs.existsSync(logDir)) {
+        fs.mkdirSync(logDir, { recursive: true });
+    }
+    return logDir;
 }
+
+const logDir = getLogDir();
+
 
 // Define log format
 const logFormat = format.printf(
@@ -28,8 +41,20 @@ const logger: Logger = createLogger({
         new transports.Console({
             format: format.combine(format.colorize(), logFormat),
         }),
-        new transports.File({ filename: path.join(logDir, 'error.log'), level: 'error' }),
-        new transports.File({ filename: path.join(logDir, 'combined.log') }),
+        // ✅ Daily rotating error log
+        new DailyRotateFile({
+            filename: path.join(logDir, 'error-%DATE%.log'),
+            datePattern: 'YYYY-MM-DD',
+            level: 'error',
+            maxFiles: '60d', // Delete logs older than 14 days
+        }),
+
+        // ✅ Daily rotating combined log
+        new DailyRotateFile({
+            filename: path.join(logDir, 'combined-%DATE%.log'),
+            datePattern: 'YYYY-MM-DD',
+            maxFiles: '60d',
+        }),
     ],
 });
 
